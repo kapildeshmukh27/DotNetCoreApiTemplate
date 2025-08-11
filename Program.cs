@@ -9,8 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
@@ -38,11 +36,13 @@ app.MapControllers();
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1");
+        c.RoutePrefix = string.Empty; // Sets Swagger UI at root (/)
+    });
 }
 
 app.MapControllers();
-
-app.MapGet("/", () => ".Net 8 API Template!");
 
 app.Run();
