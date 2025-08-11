@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCoreApiTemplate", "DotNetCoreApiTemplate.csproj", "{8F114BF8-4D5B-4CF5-81E6-58040F5811EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F114BF8-4D5B-4CF5-81E6-58040F5811EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F114BF8-4D5B-4CF5-81E6-58040F5811EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F114BF8-4D5B-4CF5-81E6-58040F5811EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F114BF8-4D5B-4CF5-81E6-58040F5811EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {97049C5D-6FF0-4D61-BD13-4351196A0794}
+	EndGlobalSection
+EndGlobal
