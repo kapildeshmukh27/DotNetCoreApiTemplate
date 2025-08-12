@@ -58,3 +58,5 @@ BEGIN
     WHERE c.CustomerId = @CustomerId
 END
 ```
+### 4. Invoke API using API-Key
+- curl -H "X-API-KEY: YOUR_SECURE_API_KEY" https://localhost:7087/api/Customer/1/orders
