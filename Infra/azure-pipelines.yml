@@ -21,7 +21,8 @@ stages:
   jobs:
   - job: TerraformDev
     pool:
-      vmImage: 'windows-latest'
+      #vmImage: 'windows-latest'
+      name: 'Default'
     steps:
     - task: AzureCLI@2
       displayName: "Terraform Init/Plan/Apply - Dev"

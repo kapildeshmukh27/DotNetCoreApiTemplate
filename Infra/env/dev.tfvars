@@ -1,4 +1,4 @@
-# Below secrets are non sensitive and are used for development purposes.
+# Below secrets are non sensitive and are used for development.
 subscription_id = "4bd03876-8f1e-4287-9077-20ee26fc94c8"
 client_id       = "16a7f084-8c1c-40fb-8da4-adbe29f2f560"
 client_secret   = "ihU8Q~DwMeNWe2~WbEwyYV9R1LZaApK5i9dGubo7"
