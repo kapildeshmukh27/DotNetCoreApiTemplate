@@ -1,0 +1,176 @@
+﻿trigger:
+  branches:
+    include:
+      - feature/*
+      - release/*
+
+variables:
+  buildConfiguration: 'Release'
+  serviceConnection: 'spn-dev-dotnetapi-sub'   # Azure RM Service Connection
+  apiProject: 'DotNetCoreApiTemplate.csproj'
+  publishDir: '$(Build.ArtifactStagingDirectory)/publish'
+  infraDir: 'infra'
+
+stages:
+# ======================
+# 1. Terraform - Dev
+# ======================
+- stage: Terraform_Dev
+  displayName: "Terraform - Dev"
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')
+  jobs:
+  - job: TerraformDev
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: AzureCLI@2
+      displayName: "Terraform Init/Plan/Apply - Dev"
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          cd $(infraDir)
+          terraform init -input=false
+          terraform validate
+          terraform plan -input=false -out=tfplan -var-file="dev.tfvars"
+          terraform apply -input=false -auto-approve tfplan
+
+# ======================
+# 2. Deploy API - Dev
+# ======================
+- stage: Deploy_Dev
+  displayName: "Deploy API - Dev"
+  dependsOn: Terraform_Dev
+  jobs:
+  - job: BuildAndDeployApiDev
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '8.0.x'
+    - task: DotNetCoreCLI@2
+      displayName: "Restore"
+      inputs:
+        command: 'restore'
+        projects: '$(apiProject)'
+    - task: DotNetCoreCLI@2
+      displayName: "Build"
+      inputs:
+        command: 'build'
+        projects: '$(apiProject)'
+        arguments: '--configuration $(buildConfiguration)'
+    - task: DotNetCoreCLI@2
+      displayName: "Publish"
+      inputs:
+        command: 'publish'
+        projects: '$(apiProject)'
+        arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
+        zipAfterPublish: true
+    - task: AzureWebApp@1
+      displayName: "Deploy to Dev AppService"
+      inputs:
+        azureSubscription: $(serviceConnection)
+        appType: 'webApp'
+        appName: 'asp-dotnetapi-dev'
+        package: '$(publishDir)/**/*.zip'
+
+# # ======================
+# # 3. Terraform - Test
+# # ======================
+# - stage: Terraform_Test
+#   displayName: "Terraform - Test"
+#   dependsOn: Deploy_Dev
+#   condition: succeeded()
+#   jobs:
+#   - deployment: TerraformTest
+#     environment: 'test'    # 👈 manual approval required in DevOps Environments
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureCLI@2
+#             displayName: "Terraform Apply - Test"
+#             inputs:
+#               azureSubscription: $(serviceConnection)
+#               scriptType: bash
+#               scriptLocation: inlineScript
+#               inlineScript: |
+#                 cd $(infraDir)
+#                 terraform init -input=false
+#                 terraform validate
+#                 terraform plan -input=false -out=tfplan -var-file="test.tfvars"
+#                 terraform apply -input=false -auto-approve tfplan
+
+# # ======================
+# # 4. Deploy API - Test
+# # ======================
+# - stage: Deploy_Test
+#   displayName: "Deploy API - Test"
+#   dependsOn: Terraform_Test
+#   condition: succeeded()
+#   jobs:
+#   - deployment: DeployApiTest
+#     environment: 'test'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             displayName: "Deploy to Test AppService"
+#             inputs:
+#               azureSubscription: $(serviceConnection)
+#               appType: 'webApp'
+#               appName: 'your-test-appservice-name'
+#               package: '$(publishDir)/**/*.zip'
+
+# # ======================
+# # 5. Terraform - Prod
+# # ======================
+# - stage: Terraform_Prod
+#   displayName: "Terraform - Prod"
+#   dependsOn: Deploy_Test
+#   condition: succeeded()
+#   jobs:
+#   - deployment: TerraformProd
+#     environment: 'prod'   # 👈 manual approval required
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureCLI@2
+#             displayName: "Terraform Apply - Prod"
+#             inputs:
+#               azureSubscription: $(serviceConnection)
+#               scriptType: bash
+#               scriptLocation: inlineScript
+#               inlineScript: |
+#                 cd $(infraDir)
+#                 terraform init -input=false
+#                 terraform validate
+#                 terraform plan -input=false -out=tfplan -var-file="prod.tfvars"
+#                 terraform apply -input=false -auto-approve tfplan
+
+# # ======================
+# # 6. Deploy API - Prod
+# # ======================
+# - stage: Deploy_Prod
+#   displayName: "Deploy API - Prod"
+#   dependsOn: Terraform_Prod
+#   condition: succeeded()
+#   jobs:
+#   - deployment: DeployApiProd
+#     environment: 'prod'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - task: AzureWebApp@1
+#             displayName: "Deploy to Prod AppService"
+#             inputs:
+#               azureSubscription: $(serviceConnection)
+#               appType: 'webApp'
+#               appName: 'your-prod-appservice-name'
+#               package: '$(publishDir)/**/*.zip'
