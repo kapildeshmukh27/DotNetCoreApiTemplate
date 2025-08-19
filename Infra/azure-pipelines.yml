@@ -27,7 +27,7 @@ stages:
       displayName: "Terraform Init/Plan/Apply - Dev"
       inputs:
         azureSubscription: $(serviceConnection)
-        scriptType: bash
+        scriptType: ps
         scriptLocation: inlineScript
         inlineScript: |
           cd $(infraDir)
