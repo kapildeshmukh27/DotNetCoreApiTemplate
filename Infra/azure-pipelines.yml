@@ -15,8 +15,8 @@ stages:
 # ======================
 # 1. Terraform - Dev
 # ======================
-- stage: Terraform
-  displayName: "Terraform Infra Deployment"
+- stage: Terraform_Dev
+  displayName: "Terraform Infra Deployment on Dev"
   jobs:
   - job: TerraformJob
     displayName: "Run Terraform"
