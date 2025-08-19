@@ -32,9 +32,11 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           cd $(infraDir)
+          $aspName = terraform output -raw app_service_plan_name
+          echo "##vso[task.setvariable variable=AppServiceName]$appName"
           terraform init -input=false
           terraform validate
-          terraform plan -input=false -out=tfplan -var-file="dev.tfvars"
+          terraform plan -input=false -out=tfplan -var-file="env\dev.tfvars"
           terraform apply -input=false -auto-approve tfplan
 
 # ======================
@@ -75,7 +77,7 @@ stages:
       inputs:
         azureSubscription: $(serviceConnection)
         appType: 'webApp'
-        appName: 'asp-dotnetapi-dev'
+        appName: '$(AppServiceName)'
         package: '$(publishDir)/**/*.zip'
 
 # # ======================
@@ -96,13 +98,13 @@ stages:
 #             displayName: "Terraform Apply - Test"
 #             inputs:
 #               azureSubscription: $(serviceConnection)
-#               scriptType: bash
+#               scriptType: ps
 #               scriptLocation: inlineScript
 #               inlineScript: |
 #                 cd $(infraDir)
 #                 terraform init -input=false
 #                 terraform validate
-#                 terraform plan -input=false -out=tfplan -var-file="test.tfvars"
+#                 terraform plan -input=false -out=tfplan -var-file="env\test.tfvars"
 #                 terraform apply -input=false -auto-approve tfplan
 
 # # ======================
