@@ -48,7 +48,8 @@ stages:
   jobs:
   - job: BuildAndDeployApiDev
     pool:
-      vmImage: 'windows-latest'
+      #vmImage: 'windows-latest'
+      name: 'Default'
     steps:
     - task: UseDotNet@2
       inputs:
