@@ -40,7 +40,7 @@ stages:
 
     # 3. Terraform Init
     - script: |
-        terraform init -input=false -upgrade \
+        terraform init -input=false -upgrade
       workingDirectory: $(infraDir)
       displayName: "Terraform Init"
 
