@@ -15,29 +15,58 @@ stages:
 # ======================
 # 1. Terraform - Dev
 # ======================
-- stage: Terraform_Dev
-  displayName: "Terraform - Dev"
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')
+stages:
+- stage: Terraform
+  displayName: "Terraform Infra Deployment"
   jobs:
-  - job: TerraformDev
+  - job: TerraformJob
+    displayName: "Run Terraform"
     pool:
-      #vmImage: 'windows-latest'
-      name: 'Default'
+      name: Default   # <-- Your self-hosted agent pool name
     steps:
-    - task: AzureCLI@2
-      displayName: "Terraform Init/Plan/Apply - Dev"
+    - checkout: self
+
+    # 1. Install Terraform (skip if already in PATH on agent)
+    - task: TerraformInstaller@1
       inputs:
-        azureSubscription: $(serviceConnection)
-        scriptType: ps
-        scriptLocation: inlineScript
-        inlineScript: |
-          cd $(infraDir)
-          $aspName = terraform output -raw app_service_plan_name
-          echo "##vso[task.setvariable variable=AppServiceName]$appName"
-          terraform init -input=false
-          terraform validate
-          terraform plan -input=false -out=tfplan -var-file="env\dev.tfvars"
-          terraform apply -input=false -auto-approve tfplan
+        terraformVersion: '1.8.5'   # or your required version
+
+    # 2. Clean old .terraform & lock file
+    - script: |
+        echo "Cleaning old .terraform folder..."
+        if exist .terraform rmdir /s /q .terraform
+        if exist .terraform.lock.hcl del /q .terraform.lock.hcl
+      workingDirectory: $(infraDir)
+      displayName: "Clean Terraform Cache"
+
+    # 3. Terraform Init
+    - script: |
+        terraform init -input=false -upgrade \
+        $aspName = terraform output -raw app_service_plan_name
+        echo "##vso[task.setvariable variable=AppServiceName]$appName"
+      workingDirectory: $(infraDir)
+      displayName: "Terraform Init"
+
+    # 4. Terraform Validate
+    - script: terraform validate
+      workingDirectory: $(infraDir)
+      displayName: "Terraform Validate"
+
+    # 5. Terraform Plan
+    - script: terraform plan -input=false -out=tfplan -var-file=env/dev.tfvars
+      workingDirectory: $(infraDir)
+      displayName: "Terraform Plan"
+
+    # 6. Publish Plan as Artifact (optional, good practice)
+    - publish: $(infraDir)/tfplan
+      artifact: terraform-plan
+
+    # 7. Terraform Apply (only on release branch)
+    - script: terraform apply -input=false -auto-approve tfplan
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/dev'))
+      workingDirectory: $(infraDir)
+      displayName: "Terraform Apply"
+
 
 # ======================
 # 2. Deploy API - Dev
