@@ -30,6 +30,14 @@ stages:
       inputs:
         terraformVersion: '1.8.5'   # or your required version
 
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: |
+          az account show
+
     # 2. Clean old .terraform & lock file
     - script: |
         echo "Cleaning old .terraform folder..."
