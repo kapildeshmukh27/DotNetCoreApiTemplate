@@ -60,7 +60,7 @@ stages:
 
     # 7. Terraform Apply (only on release branch)
     - script: terraform apply -input=false -auto-approve tfplan
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/dev'))
+      #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release/dev'))
       workingDirectory: $(infraDir)
       displayName: "Terraform Apply"
 
