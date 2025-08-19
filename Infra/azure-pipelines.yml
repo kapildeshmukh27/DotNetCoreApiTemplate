@@ -112,7 +112,7 @@ stages:
       inputs:
         azureSubscription: $(serviceConnection)
         appType: 'webApp'
-        appName: 'asp-dotnetapi-dev'
+        appName: 'app-dotnetapi-dev'
         package: '$(publishDir)/**/*.zip'
 
 # # ======================
